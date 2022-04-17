@@ -1,3 +1,6 @@
+def scmvars
+def image
+
 pipeline {
    agent any
 
@@ -11,6 +14,7 @@ pipeline {
    }
 
    stages {
+      
       stage('Preparation') {
          steps {
             cleanWs()
