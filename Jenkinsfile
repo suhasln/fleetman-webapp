@@ -19,24 +19,27 @@ podTemplate(label: label, containers: [
    }
 
     node(label) {
-
+        container('git') {
         stage('Preparation') {
          steps {
             cleanWs()
             git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
          }
       }
-        
+        }
+        container('git') {
          stage('Build') {
          steps {
             sh 'echo No build required for Webapp.'
          }
       }
-
+        }
+        container('kubectl') {
         stage('Deploy to Cluster') {
           steps {
             sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
           }
       }
+        }
     }
 }
