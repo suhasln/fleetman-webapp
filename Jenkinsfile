@@ -1,11 +1,16 @@
-def scmvars
-def image
+def label = "mypod-${UUID.randomUUID().toString()}"
+def name = 'jenkins'
 
-pipeline {
-   agent any
+podTemplate(label: 'label', containers: [
+    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
+    containerTemplate(name: 'kubectl', image: 'suhasln/kubectl', command: 'cat', ttyEnabled: true)
+  ],
+  volumes: [
+    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
+  ]
+  ) { 
+    environment {
 
-   environment {
-     // You must set the following environment variables
      ORGANIZATION_NAME = "suhasln"
      YOUR_DOCKERHUB_USERNAME = "suhasln"
      
@@ -13,30 +18,25 @@ pipeline {
      REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
    }
 
-   stages {
-      
-      stage('Preparation') {
+    node('label') {
+
+        stage('Preparation') {
          steps {
             cleanWs()
             git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
          }
       }
-      stage('Build') {
+        
+         stage('Build') {
          steps {
             sh 'echo No build required for Webapp.'
          }
       }
-/*
-      stage('Build and Push Image') {
-         steps {
-           sh 'docker image build -t ${REPOSITORY_TAG} .'
-         }
-      }
-*/
-      stage('Deploy to Cluster') {
+
+        stage('Deploy to Cluster') {
           steps {
             sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
           }
       }
-   }
+    }
 }
