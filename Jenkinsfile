@@ -1,7 +1,7 @@
-def label = "mypod-${UUID.randomUUID().toString()}"
+def label = "keptnpod-${UUID.randomUUID().toString()}"
 def name = 'jenkins'
 
-podTemplate(label: 'label', containers: [
+podTemplate(label: label, containers: [
     containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
     containerTemplate(name: 'kubectl', image: 'suhasln/kubectl', command: 'cat', ttyEnabled: true)
   ],
@@ -18,7 +18,7 @@ podTemplate(label: 'label', containers: [
      REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
    }
 
-    node('label') {
+    node(label) {
 
         stage('Preparation') {
          steps {
