@@ -1,19 +1,19 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: webapp
+  name: web-app
 spec:
   selector:
     matchLabels:
-      app: webapp
+      app: web-app
   replicas: 1
   template: # template for the pods
     metadata:
       labels:
-        app: webapp
+        app: web-app
     spec:
       containers:
-      - name: webapp
+      - name: web-app
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice
@@ -27,14 +27,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: fleetman-webapp
+  name: web-app
 
 spec:
   # This defines which pods are going to be represented by this Service
   # The service becomes a network endpoint for either other services
   # or maybe external users to connect to (eg browser)
   selector:
-    app: webapp
+    app: web-app
 
   ports:
     - name: http
