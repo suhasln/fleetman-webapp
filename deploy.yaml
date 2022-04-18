@@ -13,7 +13,7 @@ spec:
         app: web-app
     spec:
       containers:
-      - name: suhasln/web-app
+      - name: suhasln/webapp
         env:
         - name: SPRING_PROFILES_ACTIVE
           value: production-microservice
