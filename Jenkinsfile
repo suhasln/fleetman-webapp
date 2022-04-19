@@ -1,45 +1,108 @@
-def label = "keptnpod-${UUID.randomUUID().toString()}"
-def name = 'jenkins'
+@Library('keptn-library@3.5')_
+def keptn = new sh.keptn.Keptn()
 
-podTemplate(label: label, containers: [
-    containerTemplate(name: 'git', image: 'alpine/git', ttyEnabled: true, command: 'cat'),
-    containerTemplate(name: 'kubectl', image: 'suhasln/kubectl', command: 'cat', ttyEnabled: true)
-  ],
-  volumes: [
-    hostPathVolume(mountPath: '/var/run/docker.sock', hostPath: '/var/run/docker.sock'),
-  ]
-  ) { 
-    environment {
+pipeline {
+   agent any
 
-     ORGANIZATION_NAME = "suhasln"
-     YOUR_DOCKERHUB_USERNAME = "suhasln"
+   environment {
+     // You must set the following environment variables
+     ORGANIZATION_NAME = 'suhasln'
+     YOUR_DOCKERHUB_USERNAME = 'suhasln'
      
-     SERVICE_NAME = "fleetman-webapp"
+     SERVICE_NAME = "webapp"
      REPOSITORY_TAG="${YOUR_DOCKERHUB_USERNAME}/${ORGANIZATION_NAME}-${SERVICE_NAME}:${BUILD_ID}"
    }
 
-    node(label) {
-        container('git') {
-        stage('Preparation') {
+   stages {
+     /* stage('Preparation') {
          steps {
             cleanWs()
             git credentialsId: 'GitHub', url: "https://github.com/${ORGANIZATION_NAME}/${SERVICE_NAME}"
          }
-      }
-        }
-        container('git') {
-         stage('Build') {
+      } */
+      
+      stage('Add Dependencies') {
          steps {
-            sh 'echo No build required for Webapp.'
+            sh 'cat /etc/issue'
          }
       }
-        }
-        container('kubectl') {
-        stage('Deploy to Cluster') {
+      
+      stage('Download Kubectl & Config') {
+         steps {
+            sh 'echo No build required for Webapp.'
+            sh 'curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.11/bin/linux/amd64/kubectl'
+            sh 'chmod +x ./kubectl'
+            sh './kubectl version --client'
+         }
+      }
+      
+      stage('Download Helm') {
+         steps {
+            sh 'echo No build required for Webapp.'
+            sh 'curl -LO https://get.helm.sh/helm-v3.6.0-linux-amd64.tar.gz'
+            sh 'tar xvf helm-v3.6.0-linux-amd64.tar.gz'
+            sh 'linux-amd64/helm version'
+         }
+      }
+
+     /* stage('Build Image') {
+         steps {
+           sh 'docker image build -t ${REPOSITORY_TAG} .'
+         }
+      } */
+      
+      stage('Test Image') {
+         steps {
+           sh 'echo "Testing..."'
+         }
+      }
+      
+      stage('Push Image') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+      
+      stage('Deploy to Dev Environment') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+      
+      stage('Run Load Tests') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+      
+      stage('Deploy To Pre-Prod') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+      
+      stage('Integration Tests') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+      
+      stage('Release') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+
+      stage('Deploy to Production') {
           steps {
-            sh 'envsubst < ${WORKSPACE}/deploy.yaml | kubectl apply -f -'
+            sh './kubectl --kubeconfig=./config apply -f deploy.yaml'
           }
       }
-        }
-    }
+      
+      stage('Run Smoke Tests') {
+         steps {
+           sh 'echo "Image is pushed to the docker repository."'
+         }
+      }
+   }
 }
